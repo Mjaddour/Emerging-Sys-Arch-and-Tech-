@@ -1,30 +1,65 @@
-# Emerging Sys Arch and Tech
+## Example Summary
 
-# Summarize the project and what problem it was solving.
-The project goal was to develop an embedded system prototype for a thermostat. It utilizes the TMP006 temperature sensor via I2C to read the room temperature. LED indicators are employed to display the thermostat's output, indicating heat status through GPIO. Additionally, two buttons enable users to increase and decrease the set temperature, utilizing GPIO interrupts. Finally, UART is used to simulate data transmission to the server over Wi-Fi.
+Application that toggles an LED(s) using a GPIO pin interrupt.
 
-# What did you do particularly well?
-Effectively structured the main thread of the program, separating different tasks into functions, which makes the code modular and easier to understand.
-Comments throughout the code helps to explain the purpose of each function and section, aiding readability.
-Employed dynamic memory allocation (malloc) appropriately for allocating memory for TemperatureSetup and InterruptSetup structs.
+## Peripherals & Pin Assignments
 
-# Where could you improve?
-Error handling: Add more robust error handling mechanisms, especially for functions like malloc, UART2_open, I2C_open, and Timer_open, where failure could occur.
-Adding more descriptive comments within functions to clarify complex operations or algorithms, making the code even more readable.
-Ensure proper cleanup of resources allocated dynamically using free to avoid memory leaks.
+When this project is built, the SysConfig tool will generate the TI-Driver
+configurations into the __ti_drivers_config.c__ and __ti_drivers_config.h__
+files. Information on pins and resources used is present in both generated
+files. Additionally, the System Configuration file (\*.syscfg) present in the
+project may be opened with SysConfig's graphical user interface to determine
+pins and resources used.
 
-# What tools and/or resources are you adding to your support network?
-Incorporating additional error handling techniques, such as logging errors to a file or displaying them on a console, would enhance debugging capabilities.
-Utilizing static code analysis tools and linters can help enforce coding standards, identify potential bugs, and improve code quality.
+* `CONFIG_GPIO_LED_0` - Indicates that the board was initialized within
+`mainThread()` also toggled by `CONFIG_GPIO_BUTTON_0`
+* `CONFIG_GPIO_LED_1` - Toggled by `CONFIG_GPIO_BUTTON_1`
+* `CONFIG_GPIO_BUTTON_0` - Toggles `CONFIG_GPIO_LED_0`
+* `CONFIG_GPIO_BUTTON_1` - Toggles `CONFIG_GPIO_LED_1`
 
-# What skills from this project will be particularly transferable to other projects and/or course work?
-Breaking down complex tasks into smaller, manageable functions/modules.
-Experience with initializing and using peripherals like UART, I2C, GPIO, and Timers, which are common in embedded systems development.
-Understanding how to schedule and coordinate tasks in real-time systems, which is applicable in various embedded and multitasking environments.
+## BoosterPacks, Board Resources & Jumper Settings
 
-# How did you make this project maintainable, readable, and adaptable?
-By organizing code into separate functions for each task, you've made it easier to maintain and modify individual components without affecting others.
-Variable and function names are clear and descriptive, contributing to readability.
-Configuration options (such as GPIO pins and timer settings) are abstracted into a separate configuration file (ti_drivers_config.h), facilitating easy adaptation to different hardware setups.
-Extensive use of comments and clear documentation within the codebase aids in understanding its functionality, making it more adaptable to future modifications.
+For board specific jumper settings, resources and BoosterPack modifications,
+refer to the __Board.html__ file.
 
+> If you're using an IDE such as Code Composer Studio (CCS) or IAR, please
+refer to Board.html in your project directory for resources used and
+board-specific jumper settings.
+
+The Board.html can also be found in your SDK installation:
+
+        <SDK_INSTALL_DIR>/source/ti/boards/<BOARD>
+
+## Example Usage
+
+* Run the example. `CONFIG_GPIO_LED_0` turns ON to indicate driver
+initialization is complete.
+
+* `CONFIG_GPIO_LED_0` is toggled by pushing `CONFIG_GPIO_BUTTON_0`.
+* `CONFIG_GPIO_LED_1` is toggled by pushing `CONFIG_GPIO_BUTTON_1`.
+
+## Application Design Details
+
+* The `gpioButtonFxn0`/`gpioButtonFxn1` functions are configured in the driver configuration
+file. These functions are called in the context of the GPIO interrupt.
+
+* Not all boards have more than one button, so `CONFIG_GPIO_LED_1` may not be
+toggled.
+
+* There is no button de-bounce logic in the example.
+
+TI-RTOS:
+
+* When building in Code Composer Studio, the configuration project will be
+imported along with the example. These projects can be found under
+\<SDK_INSTALL_DIR>\/kernel/tirtos/builds/\<BOARD\>/(release|debug)/(ccs|gcc).
+The configuration project is referenced by the example, so it
+will be built first. The "release" configuration has many debug features
+disabled. These features include assert checking, logging and runtime stack
+checks. For a detailed difference between the "release" and "debug"
+configurations, please refer to the TI-RTOS Kernel User's Guide.
+
+FreeRTOS:
+
+* Please view the `FreeRTOSConfig.h` header file for example configuration
+information.
